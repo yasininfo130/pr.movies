@@ -19,23 +19,24 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    # 🔹 এখানেই ফিক্স করা হয়েছে: গিটহাবকে নির্দিষ্ট স্ট্যাবল ভার্সন ব্যবহার করতে বলা হলো
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.2' 
 
-    - name: Build Debug APK (Auto-detect folder)
+    - name: Build Debug APK
       run: |
-        # এই কোডটি নিজে থেকেই আপনার MyMovieApp ফোল্ডার খুঁজে তার ভেতরে ঢুকে যাবে
+        # ফোল্ডার অটো-ডিটেক্ট করে বিল্ড করবে
         PROJECT_DIR=$(dirname $(find . -name "settings.gradle" | head -n 1))
-        echo "প্রজেক্ট পাওয়া গেছে এই ফোল্ডারে: $PROJECT_DIR"
+        echo "প্রজেক্ট পাওয়া গেছে: $PROJECT_DIR"
         cd "$PROJECT_DIR"
         
-        # অ্যাপ বিল্ড শুরু
-        chmod +x gradlew 2>/dev/null || true
+        # স্ট্যাবল গ্র্যাডল দিয়ে বিল্ড
         gradle assembleDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: PR-Movies-Pro-App
-        # APK তৈরি হওয়ার পর সেটি যেখানেই থাকুক, খুঁজে আপলোড করে দিবে
         path: ./**/app/build/outputs/apk/debug/app-debug.apk
