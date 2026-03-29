@@ -11,25 +11,31 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4  # 🔹 v3 থেকে v4 করা হয়েছে
+      uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4  # 🔹 v3 থেকে v4 করা হয়েছে
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew || true
-
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3  # 🔹 লেটেস্ট ভার্সনে আপডেট করা হয়েছে
+      uses: gradle/actions/setup-gradle@v3
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace || gradle assembleDebug
+    - name: Build Debug APK (Auto-detect folder)
+      run: |
+        # এই কোডটি নিজে থেকেই আপনার MyMovieApp ফোল্ডার খুঁজে তার ভেতরে ঢুকে যাবে
+        PROJECT_DIR=$(dirname $(find . -name "settings.gradle" | head -n 1))
+        echo "প্রজেক্ট পাওয়া গেছে এই ফোল্ডারে: $PROJECT_DIR"
+        cd "$PROJECT_DIR"
+        
+        # অ্যাপ বিল্ড শুরু
+        chmod +x gradlew 2>/dev/null || true
+        gradle assembleDebug --stacktrace
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4  # 🔹 মূল এররটি এখান থেকেই ঠিক করা হয়েছে (v4)
+      uses: actions/upload-artifact@v4
       with:
         name: PR-Movies-Pro-App
-        path: app/build/outputs/apk/debug/app-debug.apk
+        # APK তৈরি হওয়ার পর সেটি যেখানেই থাকুক, খুঁজে আপলোড করে দিবে
+        path: ./**/app/build/outputs/apk/debug/app-debug.apk
